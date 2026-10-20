@@ -1,9 +1,6 @@
 ---
 title: Surface Defect Classification using Transfer Learning
-author: Sabari
-register_no: 24205022
-institution: National Engineering College (NEC), K.R. Nagar, Kovilpatti
-date: 2026-10-06
+author: Sabarisabarisastha V
 ---
 
 # Surface Defect Classifier Documentation
@@ -374,22 +371,6 @@ python src/evaluate.py
 python app/app.py
 ```
 
-## 16. Viva Preparation
-1. **What is transfer learning?** Taking a model trained on a huge dataset (ImageNet) and fine-tuning it on our small dataset (NEU-DET) to save time and prevent overfitting.
-2. **Why ResNet18?** It balances high accuracy with low computational cost and inference time, making it suitable for real-time factory inspection.
-3. **What is a residual connection?** A shortcut in a neural network that adds the input of a layer directly to its output, solving the vanishing gradient problem in deep networks.
-4. **Why did we freeze the backbone in Phase 1?** To train the random, untrained classification head without destroying the valuable pre-trained edge-detecting weights in the lower layers.
-5. **What is ReLU?** Rectified Linear Unit. An activation function ($max(0, x)$) that introduces non-linearity, allowing the network to learn complex patterns.
-6. **What is Softmax?** A function used at the final layer that squashes the network's raw output (logits) into a probability distribution summing to 1.
-7. **What is early stopping?** Halting training if the validation loss doesn't improve for a set number of epochs (patience) to prevent overfitting.
-8. **What is overfitting?** When a model memorizes the training data but fails to generalize to new, unseen test data.
-9. **Why normalize images?** To scale pixel values so they have a mean of 0 and standard deviation of 1, which helps the network converge faster and more stably.
-10. **What is a confusion matrix?** A table showing where the model makes errors, mapping the actual classes against the predicted classes.
-11. **What is Grad-CAM?** Gradient-weighted Class Activation Mapping. It uses the gradients flowing into the final convolutional layer to produce a heatmap highlighting the regions of the image the model used to make its decision.
-12. **Why did the Google image fail?** Domain gap. The model learned the specific lighting and texture of factory line-scan cameras, not the lighting, depth, and shadows of consumer photography.
-13. **What happens if you upload a picture of a cat?** The model will classify it as one of the 6 steel defects with 100% confidence because it was never trained on an "Unknown" or "Background" class.
-14. **What is AdamW?** An optimization algorithm that updates the network's weights. The 'W' stands for Weight Decay, which regularizes the weights to prevent overfitting.
-15. **Why do we convert inference images to grayscale?** Because the model was trained exclusively on grayscale images. Converting uploads to grayscale normalizes them closer to the training domain.
 
 ## 17. References
 - Song, K. and Yan, Y., 2013. A noise robust method based on completed local binary patterns for hot-rolled steel strip surface defects. *Applied Surface Science*, 285, pp.858-864. (NEU-DET Dataset source).
