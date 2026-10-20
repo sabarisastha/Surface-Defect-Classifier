@@ -310,4 +310,4 @@ When `FORCE_GRAYSCALE_INFERENCE = True` (default in `src/config.py`), every uplo
 
 ---
 
-<p align="center">Made with ❤️ by <b>Sabari</b> · National Engineering College (NEC), Kovilpatti</p>
+<p align="center">Made with ❤️ by <b>Sabarisastha V </b> </p>
