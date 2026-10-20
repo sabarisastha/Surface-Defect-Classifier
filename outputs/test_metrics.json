@@ -1,0 +1,6 @@
+{
+  "architecture": "resnet18",
+  "test_accuracy": 1.0,
+  "ms_per_image": 3.433706000005259,
+  "classification_report": "                 precision    recall  f1-score   support\n\n        crazing     1.0000    1.0000    1.0000        45\n      inclusion     1.0000    1.0000    1.0000        45\n        patches     1.0000    1.0000    1.0000        45\n pitted_surface     1.0000    1.0000    1.0000        46\nrolled-in_scale     1.0000    1.0000    1.0000        45\n      scratches     1.0000    1.0000    1.0000        45\n\n       accuracy                         1.0000       271\n      macro avg     1.0000    1.0000    1.0000       271\n   weighted avg     1.0000    1.0000    1.0000       271\n"
+}

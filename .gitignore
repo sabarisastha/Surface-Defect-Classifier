@@ -1,0 +1,41 @@
+# ── Dataset (too large for GitHub) ───────────────────────
+data/
+*.zip
+*.msi
+
+# ── Model weights (too large for GitHub) ──────────────────
+# class_names.json is kept (tracked in models/)
+models/*.pth
+
+# ── Generated output plots (kept — pushed to docs/outputs) ─
+# outputs/ is NOT ignored; we push the PNGs for the README
+
+# ── Temp uploads ──────────────────────────────────────────
+app/static/uploads/
+
+# ── Python cache ──────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# ── Virtual environment ────────────────────────────────────
+.env
+.venv/
+venv/
+
+# ── Build artifacts ───────────────────────────────────────
+*.egg-info/
+dist/
+build/
+
+# ── Scratch / temp files ──────────────────────────────────
+scratch_params.py
+compare_predict.py
+test_gray.py
+1.26
+
+# ── OS junk ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db

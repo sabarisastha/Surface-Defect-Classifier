@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surface Defect Classifier</title>
+  <style>
+    /* ── Reset & base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: #94a3b8;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    /* ── Card ───────────────────────────────────────────────── */
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 1rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 640px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* ── Drop zone ──────────────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed #475569;
+      border-radius: 0.75rem;
+      padding: 2.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.over {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.05);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-zone .icon { font-size: 2.5rem; }
+    .drop-zone p { color: #94a3b8; margin-top: 0.5rem; font-size: 0.9rem; }
+    .drop-zone strong { color: #38bdf8; }
+
+    /* ── Preview ────────────────────────────────────────────── */
+    #preview-wrap { margin-top: 1.25rem; display: none; text-align: center; }
+    #preview-wrap img {
+      max-width: 100%; max-height: 300px;
+      border-radius: 0.5rem;
+      border: 1px solid #334155;
+    }
+
+    /* ── Button ─────────────────────────────────────────────── */
+    button[type="submit"] {
+      margin-top: 1.25rem;
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 0.6rem;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #0f172a;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button[type="submit"]:hover { opacity: 0.88; }
+    button[type="submit"]:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Spinner ─────────────────────────────────────────────── */
+    .spinner {
+      display: none;
+      margin: 1.25rem auto;
+      width: 36px; height: 36px;
+      border: 4px solid #334155;
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Results ─────────────────────────────────────────────── */
+    #results { margin-top: 1.5rem; display: none; }
+    #results h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .predicted-class {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 1rem;
+    }
+    .confidence-badge {
+      display: inline-block;
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      padding: 0.2rem 0.7rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    /* ── Bar chart ───────────────────────────────────────────── */
+    .bar-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .bar-item label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 0.2rem;
+    }
+    .bar-track {
+      background: #0f172a;
+      border-radius: 9999px;
+      overflow: hidden;
+      height: 10px;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.6s ease;
+    }
+
+    /* ── Error ───────────────────────────────────────────────── */
+    .error-box {
+      background: #450a0a;
+      border: 1px solid #b91c1c;
+      color: #fca5a5;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* ── Classes legend ─────────────────────────────────────── */
+    .classes-legend {
+      margin-top: 2rem;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+    .classes-legend span {
+      display: inline-block;
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.3rem;
+      margin: 0.15rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🔍 Surface Defect Classifier</h1>
+  <p>NEU Steel Strip · ResNet18 Transfer Learning · 6 Classes</p>
+</header>
+
+<div class="card">
+  <form id="upload-form" enctype="multipart/form-data">
+    <!-- Drop zone -->
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" name="file" id="file-input" accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff" />
+      <div class="icon">🖼️</div>
+      <p><strong>Click to upload</strong> or drag &amp; drop</p>
+      <p>PNG, JPG, BMP, TIFF · max 10 MB</p>
+    </div>
+    <p style="text-align: center; font-size: 0.8rem; color: #94a3b8; margin-top: 0.5rem; margin-bottom: 1rem;">
+      Images are converted to grayscale before classification. Best results with hot-rolled steel strip images (NEU-DET style).
+    </p>
+
+    <!-- Image preview -->
+    <div id="preview-wrap">
+      <img id="preview-img" src="" alt="Preview" />
+    </div>
+
+    <button type="submit" id="submit-btn" disabled>Classify Image</button>
+  </form>
+
+  <div class="spinner" id="spinner"></div>
+
+  <!-- Results -->
+  <div id="results">
+    <h2>Prediction</h2>
+    <div class="predicted-class" id="predicted-class"></div>
+    <ul class="bar-list" id="bar-list"></ul>
+  </div>
+</div>
+
+<!-- Class legend -->
+<div class="classes-legend">
+  Known classes:&nbsp;
+  {% for cls in class_names %}
+    <span>{{ cls }}</span>
+  {% endfor %}
+</div>
+
+<script>
+  const fileInput  = document.getElementById('file-input');
+  const dropZone   = document.getElementById('drop-zone');
+  const previewWrap = document.getElementById('preview-wrap');
+  const previewImg  = document.getElementById('preview-img');
+  const submitBtn   = document.getElementById('submit-btn');
+  const spinner     = document.getElementById('spinner');
+  const resultsDiv  = document.getElementById('results');
+  const predictedEl = document.getElementById('predicted-class');
+  const barList     = document.getElementById('bar-list');
+
+  // ── Preview ──────────────────────────────────────────────────
+  function showPreview(file) {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    previewImg.src = url;
+    previewWrap.style.display = 'block';
+    submitBtn.disabled = false;
+    resultsDiv.style.display = 'none';
+  }
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) showPreview(fileInput.files[0]);
+  });
+
+  // ── Drag & drop ─────────────────────────────────────────────
+  ['dragenter','dragover'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('over'); })
+  );
+  ['dragleave','drop'].forEach(ev =>
+    dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('over'); })
+  );
+  dropZone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) { showPreview(file); fileInput.files = e.dataTransfer.files; }
+  });
+
+  // ── Submit ───────────────────────────────────────────────────
+  document.getElementById('upload-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!fileInput.files[0]) return;
+
+    spinner.style.display = 'block';
+    submitBtn.disabled = true;
+    resultsDiv.style.display = 'none';
+    barList.innerHTML = '';
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    try {
+      const resp = await fetch('/predict', { method: 'POST', body: formData });
+      const data = await resp.json();
+
+      spinner.style.display = 'none';
+
+      if (data.error) {
+        barList.innerHTML = `<li><div class="error-box">⚠️ ${data.error}</div></li>`;
+        resultsDiv.style.display = 'block';
+        return;
+      }
+
+      // Show predicted class + confidence
+      predictedEl.innerHTML =
+        `${data.predicted_class}` +
+        `<span class="confidence-badge">${(data.confidence * 100).toFixed(1)}%</span>`;
+
+      // Update preview to show the grayscale version seen by the model
+      if (data.processed_preview) {
+        previewImg.src = data.processed_preview;
+      }
+
+      // Show top-k bars
+      data.top_k.forEach(item => {
+        const pct = (item.probability * 100).toFixed(1);
+        const li = document.createElement('li');
+        li.className = 'bar-item';
+        li.innerHTML = `
+          <label>
+            <span>${item.class}</span>
+            <span>${pct}%</span>
+          </label>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:0%" data-pct="${pct}"></div>
+          </div>`;
+        barList.appendChild(li);
+      });
+
+      resultsDiv.style.display = 'block';
+
+      // Animate bars
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.bar-fill').forEach(el => {
+          el.style.width = el.dataset.pct + '%';
+        });
+      });
+
+    } catch (err) {
+      spinner.style.display = 'none';
+      barList.innerHTML = `<li><div class="error-box">⚠️ Request failed: ${err.message}</div></li>`;
+      resultsDiv.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
